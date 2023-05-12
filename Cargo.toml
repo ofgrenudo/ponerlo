@@ -1,9 +1,0 @@
-[package]
-name = "ponerlo"
-version = "0.1.0"
-edition = "2021"
-authors = ["Joshua Winters-Brown"]
-description = "Ponerlo leverages the SnipeIT api to insert device information into the databse when ran."
-license = "GNU GPLv3"
-
-[dependencies]
