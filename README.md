@@ -6,12 +6,15 @@ Ponerlo is a tool to take device information, and on run upload it to the SnipeI
 
 The point of the roadmap is to keep this project on track. Here we will outline our goals and what we would like to see from the application. As time goes, this may change and or be updated. 
 
-- [ ] Generate Values to Upload to Snipe.
-    - [ ] Read Asset Tag from Registry Key.
-- [ ] Get environment variables that configure the API Key, as well as the url to post to. 
-- [ ] Format JSON Body.
-- [ ] Send Post Request.
-- [ ] Handle Errors accordingly.
+- [ ] Collect Information from Local Machine...
+- [ ] Check Snipe for device with Existing Serial Number or Asset Tag.
+- [ ] Insert the record
+    - [ ] If the device does exist, PUT the record.
+    - [ ] If the device does not exist, POST the record.
+
+Possible redundancy later on in the line could be to double book the information into MECM if possible.
+
+Currently, the goal is to just *get it working*. Long term, the Idea would be to rebase this and write it in Rust. Rust is the chosen language for its inherient saftey, and strongly typed features. As well as the fact that it compiles down into a native binary, making for easy distrubtion...
 
 ## Contributing
 
