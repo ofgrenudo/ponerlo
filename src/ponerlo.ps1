@@ -198,7 +198,7 @@ function New-Model([string]$new_model) {
 
     $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
 
-    $postParams = @{name=$my_device.model; category_id=0; manufacture_id=0}
+    $postParams = @{name=$my_device.model; category_id=0; manufacture_id=0} # TODO: I need to create, Get-CategoryID, New-CategoryID, Get-ManufactureID, New-ManufactureID
     $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
     $response = $response | ConvertFrom-Json  
 
