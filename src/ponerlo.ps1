@@ -60,7 +60,7 @@ function Test-GetDeviceInformation {
 function Get-EnvironmentVariables { 
     $environment_variables = @{}
 
-    Get-Content .env | foreach {
+    Get-Content .env | ForEach-Object {
         $name, $value = $_.split('=')
         if ([string]::IsNullOrWhiteSpace($name) -Or $name.Contains('#')) {
             continue
@@ -112,21 +112,115 @@ function Test-GetWithGoodSN {
     $response_from_snipe = Get-DeviceFromSnipeWithSN($my_device.serial_number)
     if ($response_from_snipe.status) { Write-Host $response_from_snipe.messages }
 
-    $response_from_snipe.rows[0] | ft
+    $response_from_snipe.rows[0] | Format-Table
 }
 
-function Get-DeviceFromSnipeWithAT {
-    return "Need To Implement."
+function Get-DeviceFromSnipeWithAT([string]$asset_tag) {
+    $my_env = Get-EnvironmentVariables
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/hardware/bytag/" + $asset_tag + "?deleted=false"
+ 
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = $response | ConvertFrom-Json  
+
+    return $response
+}
+
+function Test-GetWithBadAT {
+    $response_from_snipe = Get-DeviceFromSnipeWithAT("987654321")
+    if ($response_from_snipe.status) { Write-Host $response_from_snipe.messages }
+}
+
+function Test-GetWithGoodAT {
+    $my_device = Get-DeviceInformation
+    $response_from_snipe = Get-DeviceFromSnipeWithAT($my_device.asset_tag)
+    if ($response_from_snipe.status) { Write-Host $response_from_snipe.messages }
+    else {
+        $response_from_snipe
+    }
+}
+
+function Get-Models {
+    $my_env = Get-EnvironmentVariables
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
+ 
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = $response | ConvertFrom-Json  
+
+    return $response
+}
+
+function Get-MyModelID([string]$my_model) {
+    $response_from_snipe = Get-Models
+
+    $max = $response_from_snipe.total
+    $i = 0
+    While ($i -le $max) {
+        if ($response_from_snipe.rows[$i].name -eq $my_model) {
+            return $response_from_snipe.rows[$i].id
+        }
+        # Write-Host "ID: " $response_from_snipe.rows[$i].id " Model: " $response_from_snipe.rows[$i].name "`t| Looking For: " $my_device.model
+        $i = $i + 1
+    }
+}
+
+function Test-GetModels {
+    $my_device = Get-DeviceInformation
+    $response_from_snipe = Get-Models
+
+    $max = $response_from_snipe.total
+    $i = 0
+    While ($i -le $max) {
+        if ($response_from_snipe.rows[$i].name -eq $my_device.model) {
+            Write-Host "Model ID:" + $response_from_snipe.rows[$i].id
+        }
+        Write-Host "ID: " $response_from_snipe.rows[$i].id " Model: " $response_from_snipe.rows[$i].name "`t| Looking For: " $my_device.model
+        $i = $i + 1
+    }
+}
+
+function New-Model([string]$new_model) {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
+
+    $postParams = @{name=$my_device.model; category_id=0; manufacture_id=0}
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = $response | ConvertFrom-Json  
+
+    return $response
 }
 
 function Test-AllFunctions { 
-    Test-GetEnvironmentVariables
+    # Test-GetEnvironmentVariables
+    # Write-Host("="*100)
+    # Test-GetDeviceInformation
+    # Write-Host("="*100)
+    # Test-GetWithBadSN
+    # Write-Host("="*100)
+    # Test-GetWithGoodSN    
+    # Write-Host("="*100)
+    # Test-GetWithBadAT
+    # Write-Host("="*100)
+    # Test-GetWithGoodAT
     Write-Host("="*100)
-    Test-GetDeviceInformation
-    Write-Host("="*100)
-    Test-GetWithBadSN
-    Write-Host("="*100)
-    Test-GetWithGoodSN    
+    # Get-Models
+    # Test-GetModels
+    Get-MyModelID("Latitude")
 }
 
 Test-AllFunctions
