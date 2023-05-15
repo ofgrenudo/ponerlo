@@ -2,6 +2,12 @@
 
 Ponerlo is a tool to take device information, and on run upload it to the SnipeIT asset inventory system. This project is currently still in its very early stages and is being actively worked on.
 
+## Getting Started
+
+1. Download the application from [github](https://github.com/ofgrenudo/ponerlo)
+2. Create an API Key from Snipe IT. My recommendation for this is to go to create a new user named 'Ponerlo' then head to https://<yoursnipeitfqdnhere>/account/api and create a new API key. Paste that key into your .env file. From there you can either tweak the .env file or leave it alone.
+3. Finally, you will need to run it on whatever device you deploy this to and it will update the Device in Your SnipeIT database.
+
 ## Roadmap
 
 The point of the roadmap is to keep this project on track. Here we will outline our goals and what we would like to see from the application. As time goes, this may change and or be updated. 
