@@ -65,7 +65,7 @@ function Get-EnvironmentVariables {
         if ([string]::IsNullOrWhiteSpace($name) -Or $name.Contains('#')) {
             continue
         }
-        $environment_variables.add($name, $value)
+        $environment_variables.add($name.Trim(), $value.Trim())
     }
     return $environment_variables
 }
@@ -205,6 +205,49 @@ function New-Model([string]$new_model) {
     return $response
 }
 
+function New-CategoryID {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/categories" + $asset_tag
+
+    $postParams = @{name=$my_env.snipe_category_name; category_type="asset";}
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = $response | ConvertFrom-Json  
+    return $response
+}
+
+function Get-CategoryID {
+    $my_env = Get-EnvironmentVariables
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/categories" + $asset_tag
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = $response | ConvertFrom-Json  
+
+    $max = $response.total + 2
+    $i = 0
+    While ($i -le $max) {
+        if ($response.rows[$i].name -eq $my_env.snipe_category_name) {
+            Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            return $response.rows[$i].id            
+        }
+        # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_env.snipe_category_name
+        $i = $i + 1
+    }
+    
+    Write-Host "Could not find " $my_env.snipe_category_name "`nCreating now..."
+    New-CategoryID
+    Write-Error "Please run the script again..."
+}
+
 function Test-AllFunctions { 
     # Test-GetEnvironmentVariables
     # Write-Host("="*100)
@@ -217,10 +260,16 @@ function Test-AllFunctions {
     # Test-GetWithBadAT
     # Write-Host("="*100)
     # Test-GetWithGoodAT
-    Write-Host("="*100)
+    # Write-Host("="*100)
     # Get-Models
+    # Write-Host("="*100)
     # Test-GetModels
-    Get-MyModelID("Latitude")
+    # Write-Host("="*100)
+    # Get-MyModelID("Latitude")
+    Write-Host("="*100)
+    # New-CategoryID
+    Get-CategoryID
+    Write-Host("="*100)
 }
 
 Test-AllFunctions
