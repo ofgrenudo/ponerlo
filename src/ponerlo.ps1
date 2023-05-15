@@ -102,11 +102,17 @@ function Get-DeviceFromSnipeWithSN([string]$serial_number) {
     return $response
 }
 
+<#
+    This will test Get-DeviceFromSnipeWithSN by providing it a bad Serial Number.
+#>
 function Test-GetWithBadSN {
     $response_from_snipe = Get-DeviceFromSnipeWithSN("234215131242")
     if ($response_from_snipe.status) { Write-Host $response_from_snipe.messages }
 }
 
+<#
+    This will test Get-DeviceFromSnipeWithAT by providing it a bad Serial Number.
+#>
 function Test-GetWithGoodSN {
     $my_device = Get-DeviceInformation
     $response_from_snipe = Get-DeviceFromSnipeWithSN($my_device.serial_number)
@@ -160,17 +166,23 @@ function Get-Models {
 }
 
 function Get-MyModelID([string]$my_model) {
-    $response_from_snipe = Get-Models
+    $my_device = Get-DeviceInformation
+    $response = Get-Models
 
-    $max = $response_from_snipe.total
+    $max = $response.total 
     $i = 0
     While ($i -le $max) {
-        if ($response_from_snipe.rows[$i].name -eq $my_model) {
-            return $response_from_snipe.rows[$i].id
+        if ($response.rows[$i].name -eq $my_device.model) {
+            # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            return $response.rows[$i].id            
         }
-        # Write-Host "ID: " $response_from_snipe.rows[$i].id " Model: " $response_from_snipe.rows[$i].name "`t| Looking For: " $my_device.model
+        Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_device.model
         $i = $i + 1
     }
+    
+    Write-Host "Could not find " $my_device.make "`nCreating now..."
+    New-Model
+    Write-Error "Please run the script again..."
 }
 
 function Test-GetModels {
@@ -198,7 +210,7 @@ function New-Model([string]$new_model) {
 
     $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
 
-    $postParams = @{name=$my_device.model; category_id=0; manufacture_id=0} # TODO: I need to create, Get-CategoryID, New-CategoryID, Get-ManufactureID, New-ManufactureID
+    $postParams = @{name=$my_device.model; category_id=Get-CategoryID; manufacture_id=Get-ManufactureID}
     $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
     $response = $response | ConvertFrom-Json  
 
@@ -232,11 +244,11 @@ function Get-CategoryID {
     $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
     $response = $response | ConvertFrom-Json  
 
-    $max = $response.total + 2
+    $max = $response.total
     $i = 0
     While ($i -le $max) {
         if ($response.rows[$i].name -eq $my_env.snipe_category_name) {
-            Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
             return $response.rows[$i].id            
         }
         # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_env.snipe_category_name
@@ -245,6 +257,50 @@ function Get-CategoryID {
     
     Write-Host "Could not find " $my_env.snipe_category_name "`nCreating now..."
     New-CategoryID
+    Write-Error "Please run the script again..."
+}
+
+function New-Manufacturer {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/manufacturers" + $asset_tag
+
+    $postParams = @{name=$my_device.make}
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = $response | ConvertFrom-Json  
+    return $response
+}
+
+function Get-ManufactureID {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/manufacturers" + $asset_tag
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = $response | ConvertFrom-Json  
+
+    $max = $response.total 
+    $i = 0
+    While ($i -le $max) {
+        if ($response.rows[$i].name -eq $my_device.make) {
+            # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            return $response.rows[$i].id            
+        }
+        # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_device.make
+        $i = $i + 1
+    }
+    
+    Write-Host "Could not find " $my_device.make "`nCreating now..."
+    New-Manufacturer
     Write-Error "Please run the script again..."
 }
 
@@ -266,10 +322,19 @@ function Test-AllFunctions {
     # Test-GetModels
     # Write-Host("="*100)
     # Get-MyModelID("Latitude")
-    Write-Host("="*100)
+    # Write-Host("="*100)
     # New-CategoryID
-    Get-CategoryID
-    Write-Host("="*100)
+    # Write-Host("="*100)
+    # Get-CategoryID
+    # Write-Host("="*100)
+    # Get-ManufactureID
+    # Write-Host("="*100)
+    # New-Model
+    # Write-Host("="*100)
+    # Test-GetModels
+    # Write-Host("="*100)
+    # Get-MyModelID
+    # Write-Host("="*100)
 }
 
 Test-AllFunctions
