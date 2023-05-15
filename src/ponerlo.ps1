@@ -349,7 +349,6 @@ function Get-Status {
     Write-Error "Please run the script again..."
 }
 
-
 function Test-AllFunctions { 
     # Test-GetEnvironmentVariables
     # Write-Host("="*100)
