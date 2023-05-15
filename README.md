@@ -11,7 +11,8 @@ The point of the roadmap is to keep this project on track. Here we will outline 
 - [ ] Insert the record
     - [ ] If the device does exist, PUT the record.
     - [ ] If the device does not exist, POST the record.
-        - [ ] Generate correct model, and category.
+        - [x] Generate correct model, and category.
+
 Possible redundancy later on in the line could be to double book the information into MECM if possible.
 
 Currently, the goal is to just *get it working*. Long term, the Idea would be to rebase this and write it in Rust. Rust is the chosen language for its inherient saftey, and strongly typed features. As well as the fact that it compiles down into a native binary, making for easy distrubtion...
