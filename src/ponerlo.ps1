@@ -176,13 +176,12 @@ function Get-MyModelID([string]$my_model) {
             # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
             return $response.rows[$i].id            
         }
-        Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_device.model
+        # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name "`t`tMatching: "      $my_device.model
         $i = $i + 1
     }
     
     Write-Host "Could not find " $my_device.make "`nCreating now..."
     New-Model
-    Write-Error "Please run the script again..."
 }
 
 function Test-GetModels {
