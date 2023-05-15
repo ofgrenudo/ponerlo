@@ -320,7 +320,7 @@ function New-Status {
     return $response
 }
 
-function Get-Status {
+function Get-StatusID {
     $my_env = Get-EnvironmentVariables
     $my_device = Get-DeviceInformation
 
@@ -330,14 +330,13 @@ function Get-Status {
 
     $uri = $my_env.snipe_root_url + "api/v1/statuslabels" + $asset_tag
     $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
-    Write-Host $response.messages
     $response = $response | ConvertFrom-Json  
 
     $max = $response.total 
     $i = 0
     While ($i -le $max) {
         if ($response.rows[$i].name -eq $my_env.snipe_status_label) {
-            Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
             return $response.rows[$i].id            
         }
         # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
@@ -352,13 +351,35 @@ function Get-Status {
 function Update-Snipe {
     $my_env = Get-EnvironmentVariables
     $my_device = Get-DeviceInformation
-    
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("content-type", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
     # Do I Exist?
     $snipe_device = Get-DeviceFromSnipeWithAT($my_device.asset_tag)
     if($snipe_device.status) {      # No
         Write-Host "Device does not exist with AT " $my_device.asset_tag
     } else {                        # Yes
         Write-Host "Device exists with associated AT. Updating now..."
+        $uri = $my_env.snipe_root_url + "api/v1/hardware/" + $snipe_device.id
+
+        $patchParams = @{asset_tag=$my_device.asset_tag; model_id=Get-MyModelID; serial=$my_device.serial_number; name=$my_device.computer_name} | ConvertTo-Json
+        $json_body = @{
+            serial= $my_device.serial_number
+            name= $my_device.computer_name
+            asset_tag= $my_device.asset_tag
+            status_id= Get-StatusID
+            model_id= Get-MyModelID
+        }
+
+        $json_body = $json_body | ConvertTo-Json
+
+        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = $response | ConvertFrom-Json  
+        Write-Host "Successfully updated device with the following information"
+        Write-Host $json_body
         break
     }
 
@@ -368,11 +389,49 @@ function Update-Snipe {
         Write-Host "Device does not exist with SN " $my_device.serial_number
     } else {                        # Yes
         Write-Host "Device exists with associated SN. Updating now..."
+
+        $uri = $my_env.snipe_root_url + "api/v1/hardware/" + $snipe_device.rows[0].id
+
+        $patchParams = @{asset_tag=$my_device.asset_tag; model_id=Get-MyModelID; serial=$my_device.serial_number; name=$my_device.computer_name} | ConvertTo-Json
+        $json_body = @{
+            serial= $my_device.serial_number
+            name= $my_device.computer_name
+            asset_tag= $my_device.asset_tag
+            status_id= Get-StatusID
+            model_id= Get-MyModelID
+        }
+
+        $json_body = $json_body | ConvertTo-Json
+
+        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = $response | ConvertFrom-Json  
+
+        Write-Host "Successfully updated device with the following information"
+        Write-Host $json_body
         break
     }
 
     if($snipe_device.status) {
         Write-Host "Creating new device now..."
+
+        $uri = $my_env.snipe_root_url + "api/v1/hardware"
+
+        $patchParams = @{asset_tag=$my_device.asset_tag; model_id=Get-MyModelID; serial=$my_device.serial_number; name=$my_device.computer_name} | ConvertTo-Json
+        $json_body = @{
+            serial= $my_device.serial_number
+            name= $my_device.computer_name
+            asset_tag= $my_device.asset_tag
+            status_id= Get-StatusID
+            model_id= Get-MyModelID
+        }
+
+        $json_body = $json_body | ConvertTo-Json
+
+        $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = $response | ConvertFrom-Json  
+
+        Write-Host "Successfully created device with the following information"
+        Write-Host $json_body
         break
     }
 }
@@ -411,9 +470,9 @@ function Test-AllFunctions {
     # Get-Status
     # Write-Host("="*100)
     # New-Status
-    # Write-Host("="*100)
+    Write-Host("="*100)
     Update-Snipe
-    # Write-Host("="*100)
+    Write-Host("="*100)
 }
 
 Test-AllFunctions
