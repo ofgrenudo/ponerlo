@@ -8,9 +8,9 @@ The point of the roadmap is to keep this project on track. Here we will outline 
 
 - [x] Collect Information from Local Machine...
 - [x] Check Snipe for device with Existing Serial Number or Asset Tag.
-- [ ] Insert the record
-    - [ ] If the device does exist, PUT the record.
-    - [ ] If the device does not exist, POST the record.
+- [x] Insert the record
+    - [x] If the device does exist, PATCH the record.
+    - [x] If the device does not exist, POST the record.
         - [x] Generate correct model, and category.
 
 > Possible redundancy later on in the line could be to double book the information into MECM if possible.
