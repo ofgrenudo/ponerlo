@@ -304,6 +304,52 @@ function Get-ManufactureID {
     Write-Error "Please run the script again..."
 }
 
+function New-Status {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/statuslabels" + $asset_tag
+
+    $postParams = @{name=$my_env.snipe_status_label;type=$my_env.snipe_status_type}
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = $response | ConvertFrom-Json  
+    return $response
+}
+
+function Get-Status {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+
+    $headers=@{}
+    $headers.Add("accept", "application/json")
+    $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
+
+    $uri = $my_env.snipe_root_url + "api/v1/statuslabels" + $asset_tag
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    Write-Host $response.messages
+    $response = $response | ConvertFrom-Json  
+
+    $max = $response.total 
+    $i = 0
+    While ($i -le $max) {
+        if ($response.rows[$i].name -eq $my_env.snipe_status_label) {
+            Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+            return $response.rows[$i].id            
+        }
+        # Write-Host "ID: " $response.rows[$i].id "`tName: " $response.rows[$i].name
+        $i = $i + 1
+    }
+
+    Write-Host "Could not find " $my_env.snipe_status_label "`nCreating now..."
+    New-Status
+    Write-Error "Please run the script again..."
+}
+
+
 function Test-AllFunctions { 
     # Test-GetEnvironmentVariables
     # Write-Host("="*100)
@@ -334,7 +380,10 @@ function Test-AllFunctions {
     # Test-GetModels
     # Write-Host("="*100)
     # Get-MyModelID
-    # Write-Host("="*100)
+    Write-Host("="*100)
+    Get-Status
+    Write-Host("="*100)
+    # New-Status
 }
 
 Test-AllFunctions
