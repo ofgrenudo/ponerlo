@@ -349,6 +349,34 @@ function Get-Status {
     Write-Error "Please run the script again..."
 }
 
+function Update-Snipe {
+    $my_env = Get-EnvironmentVariables
+    $my_device = Get-DeviceInformation
+    
+    # Do I Exist?
+    $snipe_device = Get-DeviceFromSnipeWithAT($my_device.asset_tag)
+    if($snipe_device.status) {      # No
+        Write-Host "Device does not exist with AT " $my_device.asset_tag
+    } else {                        # Yes
+        Write-Host "Device exists with associated AT. Updating now..."
+        break
+    }
+
+    # Do I Exist?
+    $snipe_device = Get-DeviceFromSnipeWithSN($my_device.serial_number)
+    if($snipe_device.status) {      # No
+        Write-Host "Device does not exist with SN " $my_device.serial_number
+    } else {                        # Yes
+        Write-Host "Device exists with associated SN. Updating now..."
+        break
+    }
+
+    if($snipe_device.status) {
+        Write-Host "Creating new device now..."
+        break
+    }
+}
+
 function Test-AllFunctions { 
     # Test-GetEnvironmentVariables
     # Write-Host("="*100)
@@ -379,10 +407,13 @@ function Test-AllFunctions {
     # Test-GetModels
     # Write-Host("="*100)
     # Get-MyModelID
-    Write-Host("="*100)
-    Get-Status
-    Write-Host("="*100)
+    # Write-Host("="*100)
+    # Get-Status
+    # Write-Host("="*100)
     # New-Status
+    # Write-Host("="*100)
+    Update-Snipe
+    # Write-Host("="*100)
 }
 
 Test-AllFunctions
