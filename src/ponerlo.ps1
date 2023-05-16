@@ -103,7 +103,7 @@ function Get-DeviceFromSnipeWithSN([string]$serial_number) {
 
     $uri = $my_env.snipe_root_url + "api/v1/hardware/byserial/" + $serial_number + "?deleted=false"
  
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     return $response
@@ -166,7 +166,7 @@ function Get-Models {
 
     $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
  
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     return $response
@@ -217,7 +217,7 @@ function New-Model([string]$new_model) {
     $uri = $my_env.snipe_root_url + "api/v1/models" + $asset_tag
 
     $postParams = @{name=$my_device.model; category_id=Get-CategoryID; manufacture_id=Get-ManufactureID}
-    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     return $response
@@ -234,7 +234,7 @@ function New-CategoryID {
     $uri = $my_env.snipe_root_url + "api/v1/categories" + $asset_tag
 
     $postParams = @{name=$my_env.snipe_category_name; category_type="asset";}
-    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams -UseBasicParsing
     $response = $response | ConvertFrom-Json  
     return $response
 }
@@ -247,7 +247,7 @@ function Get-CategoryID {
     $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
 
     $uri = $my_env.snipe_root_url + "api/v1/categories" + $asset_tag
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     $max = $response.total
@@ -277,7 +277,7 @@ function New-Manufacturer {
     $uri = $my_env.snipe_root_url + "api/v1/manufacturers" + $asset_tag
 
     $postParams = @{name=$my_device.make}
-    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams -UseBasicParsing
     $response = $response | ConvertFrom-Json  
     return $response
 }
@@ -291,7 +291,7 @@ function Get-ManufactureID {
     $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
 
     $uri = $my_env.snipe_root_url + "api/v1/manufacturers" + $asset_tag
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     $max = $response.total 
@@ -321,7 +321,7 @@ function New-Status {
     $uri = $my_env.snipe_root_url + "api/v1/statuslabels" + $asset_tag
 
     $postParams = @{name=$my_env.snipe_status_label;type=$my_env.snipe_status_type}
-    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams
+    $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $postParams -UseBasicParsing
     $response = $response | ConvertFrom-Json  
     return $response
 }
@@ -335,7 +335,7 @@ function Get-StatusID {
     $headers.Add("Authorization", "Bearer " + $my_env.snipe_api_key)
 
     $uri = $my_env.snipe_root_url + "api/v1/statuslabels" + $asset_tag
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     $max = $response.total 
@@ -382,7 +382,7 @@ function Update-Snipe {
 
         $json_body = $json_body | ConvertTo-Json
 
-        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body -UseBasicParsing
         $response = $response | ConvertFrom-Json  
         Write-Host "Successfully updated device with the following information"
         Write-Host $json_body
@@ -420,7 +420,7 @@ function Update-Snipe {
 
         $json_body = $json_body | ConvertTo-Json
 
-        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = Invoke-WebRequest -Uri $uri -Method PATCH -Headers $headers -ContentType 'application/json' -Body $json_body -UseBasicParsing
         $response = $response | ConvertFrom-Json  
 
         Write-Host "Successfully updated device with the following information"
@@ -455,7 +455,7 @@ function Update-Snipe {
 
         $json_body = $json_body | ConvertTo-Json
 
-        $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -ContentType 'application/json' -Body $json_body
+        $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -ContentType 'application/json' -Body $json_body -UseBasicParsing
         $response = $response | ConvertFrom-Json  
 
         Write-Host "Successfully created device with the following information"
