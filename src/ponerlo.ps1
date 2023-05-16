@@ -37,6 +37,13 @@ function Get-DeviceInformation {
     $device.serial_number = $bios_information.SerialNumber
     $device.asset_tag = $bios_information.SMBIOSAssetTag # We will have to check two places, bios, and MECM task sequence.
 
+    try {
+        $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
+        $device.asset_tag = $tsenv.Value("OSDAssetTag")        
+    }
+    catch {
+        $device.asset_tag = $bios_information.SMBIOSAssetTag # We will have to check two places, bios, and MECM task sequence.
+    }
     return $device
 }
 
@@ -379,6 +386,17 @@ function Update-Snipe {
         $response = $response | ConvertFrom-Json  
         Write-Host "Successfully updated device with the following information"
         Write-Host $json_body
+
+        # Set variables to indicate value and key to set
+        $RegistryPath = 'HKLM:\Software\Ponerlo\'
+        $Name         = 'Completed'
+        $Value        = '1'
+        # Create the key if it does not exist
+        If (-NOT (Test-Path $RegistryPath)) {
+            New-Item -Path $RegistryPath -Force | Out-Null
+        }  
+        # Now set the value
+        New-ItemProperty -Path $RegistryPath -Name $Name -Value $Value -PropertyType DWORD -Force
         break
     }
 
@@ -407,6 +425,17 @@ function Update-Snipe {
 
         Write-Host "Successfully updated device with the following information"
         Write-Host $json_body
+
+        # Set variables to indicate value and key to set
+        $RegistryPath = 'HKLM:\Software\Ponerlo\'
+        $Name         = 'Completed'
+        $Value        = '1'
+        # Create the key if it does not exist
+        If (-NOT (Test-Path $RegistryPath)) {
+            New-Item -Path $RegistryPath -Force | Out-Null
+        }  
+        # Now set the value
+        New-ItemProperty -Path $RegistryPath -Name $Name -Value $Value -PropertyType DWORD -Force
         break
     }
 
@@ -431,47 +460,19 @@ function Update-Snipe {
 
         Write-Host "Successfully created device with the following information"
         Write-Host $json_body
+
+        # Set variables to indicate value and key to set
+        $RegistryPath = 'HKLM:\Software\Ponerlo\'
+        $Name         = 'Completed'
+        $Value        = '1'
+        # Create the key if it does not exist
+        If (-NOT (Test-Path $RegistryPath)) {
+            New-Item -Path $RegistryPath -Force | Out-Null
+        }  
+        # Now set the value
+        New-ItemProperty -Path $RegistryPath -Name $Name -Value $Value -PropertyType DWORD -Force
         break
     }
 }
 
-function Test-AllFunctions { 
-    # Test-GetEnvironmentVariables
-    # Write-Host("="*100)
-    # Test-GetDeviceInformation
-    # Write-Host("="*100)
-    # Test-GetWithBadSN
-    # Write-Host("="*100)
-    # Test-GetWithGoodSN    
-    # Write-Host("="*100)
-    # Test-GetWithBadAT
-    # Write-Host("="*100)
-    # Test-GetWithGoodAT
-    # Write-Host("="*100)
-    # Get-Models
-    # Write-Host("="*100)
-    # Test-GetModels
-    # Write-Host("="*100)
-    # Get-MyModelID("Latitude")
-    # Write-Host("="*100)
-    # New-CategoryID
-    # Write-Host("="*100)
-    # Get-CategoryID
-    # Write-Host("="*100)
-    # Get-ManufactureID
-    # Write-Host("="*100)
-    # New-Model
-    # Write-Host("="*100)
-    # Test-GetModels
-    # Write-Host("="*100)
-    # Get-MyModelID
-    # Write-Host("="*100)
-    # Get-Status
-    # Write-Host("="*100)
-    # New-Status
-    Write-Host("="*100)
-    Update-Snipe
-    Write-Host("="*100)
-}
-
-Test-AllFunctions
+Update-Snipe
