@@ -137,7 +137,7 @@ function Get-DeviceFromSnipeWithAT([string]$asset_tag) {
 
     $uri = $my_env.snipe_root_url + "api/v1/hardware/bytag/" + $asset_tag + "?deleted=false"
  
-    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -UseBasicParsing
     $response = $response | ConvertFrom-Json  
 
     return $response
