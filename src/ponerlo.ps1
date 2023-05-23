@@ -35,15 +35,8 @@ function Get-DeviceInformation {
     $device.make = $system_information.Manufacturer
     $device.model = $system_information.Model
     $device.serial_number = $bios_information.SerialNumber
-    $device.asset_tag = $bios_information.SMBIOSAssetTag # We will have to check two places, bios, and MECM task sequence.
+    $device.asset_tag =   Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\KVCC' -Name "Asset Tag"
 
-    try {
-        $tsenv = New-Object -COMObject Microsoft.SMS.TSEnvironment
-        $device.asset_tag = $tsenv.Value("OSDAssetTag")        
-    }
-    catch {
-        $device.asset_tag = $bios_information.SMBIOSAssetTag # We will have to check two places, bios, and MECM task sequence.
-    }
     return $device
 }
 
