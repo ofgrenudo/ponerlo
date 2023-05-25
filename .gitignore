@@ -1,2 +1,2 @@
 .env
-tattoo.ps1
+build\bin\*.exe
