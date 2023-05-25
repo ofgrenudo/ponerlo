@@ -35,7 +35,8 @@ function Get-DeviceInformation {
     $device.make = $system_information.Manufacturer
     $device.model = $system_information.Model
     $device.serial_number = $bios_information.SerialNumber
-    $device.asset_tag =   Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\KVCC' -Name "Asset Tag"
+    # $device.asset_tag =   Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\KVCC' -Name "Asset Tag"
+    $device.asset_tag = Get-Content -Path C:\kvcc\device_information.json | Out-String
 
     return $device
 }
